@@ -30,18 +30,18 @@ def get_pending_patient_information_data_from_db():
         for doc in _collection.find({"appointment_status": "Pending"})
     )
 
-    
 
-def update_appointment_status(appointment_id: str,new_status: str,new_date: str = None,new_time: str = None) -> dict:
+def update_appointment_status(appointment_id: str, new_status: str, new_date: str = None, new_time: str = None) -> dict:
     """
     Update appointment details in MongoDB.
     
     - For booking/cancel: only updates appointment_status
     - For reschedule: updates appointment_status + date + time
+    - For confirmed/cancelled: updates appointment_status with clear messages
 
     Args:
         appointment_id (str): The appointment ID to match
-        new_status (str): The new status ("booking in progress", "confirmed", "pending","rescheduled","cancelled")
+        new_status (str): The new status ("booking in progress", "confirmed", "pending", "rescheduled", "cancelled")
         new_date (str, optional): The new appointment date (required if rescheduling)
         new_time (str, optional): The new appointment time (required if rescheduling)
 
@@ -49,9 +49,9 @@ def update_appointment_status(appointment_id: str,new_status: str,new_date: str 
         dict: A summary of the update result
     """
 
-    update_fields = {"appointment_status": new_status}
+    update_fields = {"appointment_status": new_status.lower()}
 
-    # If rescheduling, also update date & time
+    # Handle reschedule
     if new_status.lower() == "rescheduled":
         if not new_date or not new_time:
             return {
@@ -61,29 +61,36 @@ def update_appointment_status(appointment_id: str,new_status: str,new_date: str 
         update_fields["appointment_booking_date"] = new_date
         update_fields["appointment_booking_time"] = new_time
 
+    # Perform MongoDB update
     result = _collection.update_one(
-        {"appointment_id": appointment_id},  # filter by appointment_id
+        {"appointment_id": appointment_id},
         {"$set": update_fields}
     )
 
+    # Prepare response
     if result.modified_count > 0:
+        # Custom messages for specific statuses
         if new_status.lower() == "rescheduled":
-            return {
-                "success": True,
-                "message": f"Appointment {appointment_id} rescheduled to {new_date} at {new_time}"
-            }
+            message = f"Appointment {appointment_id} successfully rescheduled to {new_date} at {new_time}."
+        elif new_status.lower() == "confirmed":
+            message = f"Appointment {appointment_id} has been confirmed successfully."
+        elif new_status.lower() == "cancelled":
+            message = f"Appointment {appointment_id} has been cancelled successfully."
         else:
-            return {
-                "success": True,
-                "message": f"Appointment {appointment_id} updated to '{new_status}'"
-            }
+            message = f"Appointment {appointment_id} updated to status '{new_status}'."
+
+        return {"success": True, "message": message}
+
     elif result.matched_count > 0:
+        # Record found but no changes made
         return {
             "success": False,
-            "message": f"Appointment {appointment_id} already has status '{new_status}'"
+            "message": f"Appointment {appointment_id} already has status '{new_status}'."
         }
+
     else:
+        # No matching appointment found
         return {
             "success": False,
-            "message": f"No appointment found with ID {appointment_id}"
+            "message": f"No appointment found with ID {appointment_id}."
         }
