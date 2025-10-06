@@ -52,7 +52,7 @@ async def process_speech(request: Request):
                 patient_data = bot_receptionist_doctor_appointment_patient_data_extraction(llm).invoke(str(result["messages"]))
                 appt_id = patient_data.get("appointment_id")
                 if appt_id:
-                    update_appointment_status(appt_id, patient_data.get("appointment_status"))
+                    update_appointment_status(appt_id, patient_data.get("appointment_status"),patient_data.get("new_date"),patient_data.get("new_time"))
                     async with (await get_queue_lock()):
                         state.processed_ids[appt_id] = now_ts()
                         state.queued_ids.discard(appt_id)
