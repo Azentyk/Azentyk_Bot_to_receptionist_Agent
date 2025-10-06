@@ -42,7 +42,7 @@ async def process_speech(request: Request):
     result = await generate_ai_response(user_speech, user_details)
     last = result["messages"][-1].content.replace("<END_OF_TURN>", "").strip()
     print("[AI] reply:", last)
-
+    
     if "appointment_status" in last:
         json_matches = re.findall(r"\{.*?\}", last)
         json_objects = [json.loads(m) for m in json_matches if m]
