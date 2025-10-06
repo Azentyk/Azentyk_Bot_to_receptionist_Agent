@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request, Response
 import state
-# from queue_service import refresh_pending_patients,trigger_next_call
 import asyncio
 from twilio.twiml.voice_response import VoiceResponse, Gather
 from ai_service import generate_ai_response
