@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TWILIO_ACCOUNT_SID = "ACaaaa83e9255e4d10cc5ca3168a510b07"
-TWILIO_AUTH_TOKEN = "b83b778c4eb11bfba150479e2fb29607"
+TWILIO_AUTH_TOKEN = "a0df54fad198cdc1e4abacfe79f5d119"
 PUBLIC_URL = "https://azentyk-bot-to-receptionist-ajfeh8cwd6hqcbhj.centralus-01.azurewebsites.net" 
 TWILIO_CALLER_ID = "+16812936895"  # Your Twilio number
 VOICE_VOICE = "Google.en-IN-Chirp3-HD-Puck"
